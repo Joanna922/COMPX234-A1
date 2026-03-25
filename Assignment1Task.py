@@ -19,16 +19,18 @@ class Assignment1:
         self.print_list = printList()  # Create an empty list of print requests
         self.mThreads = []             # list for machine threads
         self.pThreads = []             # list for printer threads
-
+# Create semaphores
+        self.semaphore = threading.Semaphore(self.NUM_PRINTERS)  # counting semaphore
+        self.binary = threading.Semaphore(1)
     def startSimulation(self):
         # Create Machine and Printer threads
         # Write code here
         for i in range(self.NUM_MACHINES):
-            m_thread = self.machineThread(i, self)
-        self.mThreads.append(m_thread)
+            thread = self.machineThread(i, self)
+            self.mThreads.append(thread)
         for i in range(self.NUM_PRINTERS):
-            p_thread = self.printerThread(i, self)
-        self.pThreads.append(p_thread)
+            thread = self.printerThread(i, self)
+            self.pThreads.append(thread)
         # Start all the threads
         # Write code here
         for t in self.mThreads:
