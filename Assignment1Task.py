@@ -12,19 +12,18 @@ class Assignment1:
     SIMULATION_TIME = 30     # Total simulation time in seconds
     MAX_PRINTER_SLEEP = 3    # Maximum sleep time for printers
     MAX_MACHINE_SLEEP = 5    # Maximum sleep time for machines
-
+    QUEUE_CAPACITY = 5
     # Initialise simulation variables
     def __init__(self):
         self.sim_active = True
         self.print_list = printList()  # Create an empty list of print requests
         self.mThreads = []             # list for machine threads
         self.pThreads = []             # list for printer threads
-# Create semaphores
+        
+    # Create semaphores
         self.semaphore = threading.Semaphore(self.NUM_PRINTERS)  # counting semaphore
         self.binary = threading.Semaphore(1)
-        self.empty = threading.Semaphore(self.QUEUE_CAPACITY)
-        self.full = threading.Semaphore(0)
-        self.mutex = threading.Lock()
+        
     def startSimulation(self):
         # Create Machine and Printer threads
         # Write code here
@@ -78,8 +77,9 @@ class Assignment1:
         def printDox(self, printerID):
             print(f"Printer ID: {printerID} : now available")
             # Print from the queue
-            self.outer.print_list.queuePrint(printerID)
-
+            self.outer.binary.release()
+            self.outer.print_list.queuePrint(printerID)        
+            self.outer.semaphore.release()
     # Machine class
     class machineThread(threading.Thread):
         def __init__(self, machineID, outer):
@@ -106,9 +106,9 @@ class Assignment1:
         def isRequestSafe(self, id):
             print(f"Machine {id} Checking availability")
             # Acquire counting semaphore (wait for an available printer)
-            
+            self.outer.semaphore.acquire()
             # Acquire binary semaphore for mutual exclusion of the print queue
-
+            self.outer.binary.acquire()
             # Both semaphores acquired
             print(f"Machine {id} will proceed")
 
