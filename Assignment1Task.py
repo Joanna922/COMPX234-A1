@@ -50,7 +50,9 @@ class Assignment1:
             t.join()
         for t in self.mThreads:
             t.join()
-
+        print("Simulation finished.")
+        # We won't join machine threads as they may be in busy waiting.
+        # Flush output and exit.
     # Printer class
     class printerThread(threading.Thread):
         def __init__(self, printerID, outer):
@@ -88,7 +90,11 @@ class Assignment1:
                 self.machineSleep()
                 # Machine wakes up and sends a print request
                 # Write code here
+                # Check if it is safe to send a request by acquiring semaphores
+                self.isRequestSafe(self.machineID)
                 self.printRequest(self.machineID)
+                # Release the binary semaphore after inserting the print request
+                self.postRequest(self.machineID)
 
         def machineSleep(self):
             sleepSeconds = random.randint(1, self.outer.MAX_MACHINE_SLEEP)
